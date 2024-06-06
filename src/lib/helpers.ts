@@ -54,9 +54,7 @@ export async function clearOffsetsForProofs(redisClient: any) {
   }
 }
 
-export function validateProcessParams(params: string[]) {
-  let exportType = process.argv[2];
-  let bullmq = process.argv[3];
+export function validateProcessParams(exportType: string, bullmq: string) {
   if(bullmq !== 'with_bullmq' && bullmq !== 'without_bullmq') {
     console.error("Please provide the BullMQ usage flag");
     return false;
