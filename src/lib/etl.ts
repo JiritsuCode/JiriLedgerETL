@@ -37,9 +37,9 @@ export class ETL {
     await this.exportDataToDune(bullmq_flag);
     await this.redisClient.disconnect();
 
-    if(bullmq_flag === 'without_bullmq') {
-      process.exit(0);
-    }
+    // if(bullmq_flag === 'without_bullmq') {
+    //   return "ETL process finished successfully"
+    // }
   }
 
   // Export only new data from chain to Dune
@@ -48,7 +48,7 @@ export class ETL {
     await this.redisClient.disconnect();
     let queueSizes = await this.duneExportQueue.getJobCounts()
     if(queueSizes['active'] === 0 && queueSizes['delayed'] === 0 && queueSizes['waiting'] === 0) {
-      process.exit(0);
+      return "ETL process finished successfully"
     }
   }
 
@@ -94,6 +94,8 @@ export class ETL {
             type: 'exponential',
             delay: 100,
           },
+          removeOnComplete: 50,
+          removeOnFail: 500,
         });
       }
     } while (loadedSources.length > 0);
@@ -140,6 +142,8 @@ export class ETL {
               type: 'exponential',
               delay: 100,
             },
+            removeOnComplete: 50,
+            removeOnFail: 500,
           });
         }
       } while (proofsForSource.length > 0);

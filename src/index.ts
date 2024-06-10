@@ -11,7 +11,7 @@ export const handler = async (event: any, context: any, callback: any) => {
 
     // Check if all required environment variables are set
     if(helpers.env_checks() === false) {
-      process.exit(0);
+      return "ETL process finished unsuccessfully"
     }
 
     // Check if all required process parameters are set and valid
@@ -19,7 +19,7 @@ export const handler = async (event: any, context: any, callback: any) => {
     // valid values for exportType: "full_export", "new_data_only"
     // valid values for bullmq_flag: "with_bullmq", "without_bullmq"
     if(helpers.validateProcessParams(event['exportType'], event['bullmq']) === false) {
-      process.exit(0);
+      return "ETL process finished unsuccessfully"
     }
 
     const rpcApi = new RPCAPI();
@@ -35,13 +35,19 @@ export const handler = async (event: any, context: any, callback: any) => {
       })
       .on('error', err => console.log('Redis Client Error', err))
       .connect();
-    const duneExportQueue = new Queue('duneExportQueue', { connection: {
+    const duneExportQueue = new Queue('{duneExportQueue}', { connection: {
       host: process.env.REDIS_HOST,
       port: parseInt(process.env.REDIS_PORT || ''),
+      tls: {},
     }});
     const etl = new ETL(redisClient, dataFormatter, duneAPI, rpcApi, duneExportQueue);
 
+    console.log(`Offset for Sources: ${Number(await redisClient.get(`lastSourcesOffset`))}`)
+    console.log(`Offest for Proofs Source 1: ${Number(await redisClient.get('lastProofsOffsetForSource1'))}`)
+    console.log(`Offest for Proofs Source 2: ${Number(await redisClient.get('lastProofsOffsetForSource2'))}`)
+    console.log(`Offest for Proofs Source 3: ${Number(await redisClient.get('lastProofsOffsetForSource3'))}`)
+
     await etl.export(event['exportType'], event['bullmq'])
 
-    return new Response();
+    return "ETL process finished successfully"
 };
