@@ -46,12 +46,22 @@ export const contractABI = [
   },
   {
     "inputs": [],
+    "name": "NewNodeNotAllowedForConsensus",
+    "type": "error"
+  },
+  {
+    "inputs": [],
     "name": "NoZeroAddress",
     "type": "error"
   },
   {
     "inputs": [],
     "name": "OnlyAdmin",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "OnlyJiriLedgerPaymentContract",
     "type": "error"
   },
   {
@@ -77,6 +87,16 @@ export const contractABI = [
   {
     "inputs": [],
     "name": "PrivateViewerDoesNotExist",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ProofIdAlreadyExists",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "RedoRequestAlreadyComplete",
     "type": "error"
   },
   {
@@ -198,6 +218,25 @@ export const contractABI = [
       {
         "indexed": false,
         "internalType": "address",
+        "name": "paymentContract",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "sender",
+        "type": "address"
+      }
+    ],
+    "name": "ModifiedJiriPaymentContract",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
         "name": "teamManagement",
         "type": "address"
       },
@@ -292,6 +331,24 @@ export const contractABI = [
         "internalType": "uint256",
         "name": "blockTime",
         "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "blockNumber",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "state",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "isOldProof",
+        "type": "bool"
       }
     ],
     "name": "NewProof",
@@ -464,6 +521,62 @@ export const contractABI = [
     "inputs": [
       {
         "indexed": false,
+        "internalType": "bytes32",
+        "name": "reqId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "sourceId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "lastSuccessfulState",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "isOldProof",
+        "type": "bool"
+      }
+    ],
+    "name": "RedoProof",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "reqId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "sourceId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "addedState",
+        "type": "string"
+      }
+    ],
+    "name": "RedoProofComplete",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
         "internalType": "string[]",
         "name": "requiredMetadata",
         "type": "string[]"
@@ -626,73 +739,6 @@ export const contractABI = [
   {
     "inputs": [
       {
-        "components": [
-          {
-            "internalType": "uint256",
-            "name": "sourceId",
-            "type": "uint256"
-          },
-          {
-            "internalType": "bytes32",
-            "name": "proofId",
-            "type": "bytes32"
-          },
-          {
-            "internalType": "string",
-            "name": "proofHash",
-            "type": "string"
-          },
-          {
-            "internalType": "string",
-            "name": "publicProofHash",
-            "type": "string"
-          },
-          {
-            "internalType": "uint256",
-            "name": "timestamp",
-            "type": "uint256"
-          },
-          {
-            "components": [
-              {
-                "internalType": "string",
-                "name": "name",
-                "type": "string"
-              },
-              {
-                "internalType": "string",
-                "name": "value",
-                "type": "string"
-              }
-            ],
-            "internalType": "struct JiriLedger.MetadataObj[]",
-            "name": "metadata",
-            "type": "tuple[]"
-          },
-          {
-            "internalType": "uint256",
-            "name": "value",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
-            "name": "quantity",
-            "type": "uint256"
-          }
-        ],
-        "internalType": "struct JiriLedger.ProofObjUpload[]",
-        "name": "proofs",
-        "type": "tuple[]"
-      }
-    ],
-    "name": "addBulkProof",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
         "internalType": "uint256",
         "name": "verifierId",
         "type": "uint256"
@@ -761,6 +807,91 @@ export const contractABI = [
         "internalType": "struct JiriLedger.MetadataObj[]",
         "name": "metadata",
         "type": "tuple[]"
+      },
+      {
+        "internalType": "string",
+        "name": "state",
+        "type": "string"
+      },
+      {
+        "internalType": "bool",
+        "name": "isOldProof",
+        "type": "bool"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "reqId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "addProof",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "sourceId_",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "proofId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "string",
+        "name": "proofHash",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "publicProofHash",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "timestamp",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "value",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "quantity",
+        "type": "uint256"
+      },
+      {
+        "components": [
+          {
+            "internalType": "string",
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "value",
+            "type": "string"
+          }
+        ],
+        "internalType": "struct JiriLedger.MetadataObj[]",
+        "name": "metadata",
+        "type": "tuple[]"
+      },
+      {
+        "internalType": "string",
+        "name": "state",
+        "type": "string"
+      },
+      {
+        "internalType": "bool",
+        "name": "isOldProof",
+        "type": "bool"
       }
     ],
     "name": "addProof",
@@ -801,6 +932,11 @@ export const contractABI = [
         "internalType": "struct JiriLedger.MetadataObj[]",
         "name": "defaultMetadata",
         "type": "tuple[]"
+      },
+      {
+        "internalType": "address",
+        "name": "sender",
+        "type": "address"
       }
     ],
     "name": "addSource",
@@ -846,6 +982,19 @@ export const contractABI = [
       }
     ],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "allowMultipleVotes",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -930,6 +1079,11 @@ export const contractABI = [
             "internalType": "bool",
             "name": "isArchived",
             "type": "bool"
+          },
+          {
+            "internalType": "string",
+            "name": "lastProofState",
+            "type": "string"
           }
         ],
         "internalType": "struct JiriLedger.SourceObj[]",
@@ -1048,6 +1202,16 @@ export const contractABI = [
             "internalType": "uint256",
             "name": "blockTime",
             "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "blockNumber",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "state",
+            "type": "string"
           }
         ],
         "internalType": "struct JiriLedger.ProofObj",
@@ -1178,6 +1342,11 @@ export const contractABI = [
             "internalType": "bool",
             "name": "isArchived",
             "type": "bool"
+          },
+          {
+            "internalType": "string",
+            "name": "lastProofState",
+            "type": "string"
           }
         ],
         "internalType": "struct JiriLedger.SourceObj",
@@ -1256,6 +1425,16 @@ export const contractABI = [
             "internalType": "uint256",
             "name": "blockTime",
             "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "blockNumber",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "state",
+            "type": "string"
           }
         ],
         "internalType": "struct JiriLedger.ProofObj[]",
@@ -1344,6 +1523,16 @@ export const contractABI = [
             "internalType": "uint256",
             "name": "blockTime",
             "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "blockNumber",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "state",
+            "type": "string"
           }
         ],
         "internalType": "struct JiriLedger.ProofObj[]",
@@ -1442,6 +1631,11 @@ export const contractABI = [
             "internalType": "bool",
             "name": "isArchived",
             "type": "bool"
+          },
+          {
+            "internalType": "string",
+            "name": "lastProofState",
+            "type": "string"
           }
         ],
         "internalType": "struct JiriLedger.SourceObj[]",
@@ -1545,6 +1739,11 @@ export const contractABI = [
             "internalType": "bool",
             "name": "isArchived",
             "type": "bool"
+          },
+          {
+            "internalType": "string",
+            "name": "lastProofState",
+            "type": "string"
           }
         ],
         "internalType": "struct JiriLedger.SourceObj[]",
@@ -1761,6 +1960,11 @@ export const contractABI = [
         "internalType": "struct JiriLedger.MetadataObj[]",
         "name": "metadata",
         "type": "tuple[]"
+      },
+      {
+        "internalType": "address",
+        "name": "sender",
+        "type": "address"
       }
     ],
     "name": "modifySource",
@@ -1789,6 +1993,63 @@ export const contractABI = [
         "internalType": "bytes32",
         "name": "",
         "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "sourceId_",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "lastSuccessfulState",
+        "type": "string"
+      },
+      {
+        "internalType": "bool",
+        "name": "isOldProof",
+        "type": "bool"
+      }
+    ],
+    "name": "redoOldProof",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "name": "redoProofRequest",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "sourceId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "lastSuccessfulState",
+        "type": "string"
+      },
+      {
+        "internalType": "bool",
+        "name": "isComplete",
+        "type": "bool"
+      },
+      {
+        "internalType": "bool",
+        "name": "exists",
+        "type": "bool"
       }
     ],
     "stateMutability": "view",
@@ -1895,13 +2156,6 @@ export const contractABI = [
       }
     ],
     "name": "requestPrivateEncryptedProof",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "resetProofs",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -2014,6 +2268,11 @@ export const contractABI = [
         "internalType": "bool",
         "name": "isArchived",
         "type": "bool"
+      },
+      {
+        "internalType": "string",
+        "name": "lastProofState",
+        "type": "string"
       }
     ],
     "stateMutability": "view",
@@ -2025,6 +2284,11 @@ export const contractABI = [
         "internalType": "uint256",
         "name": "sourceId_",
         "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "sender",
+        "type": "address"
       }
     ],
     "name": "stopSource",
@@ -2073,6 +2337,19 @@ export const contractABI = [
       }
     ],
     "name": "transferOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "paymentContractAddress",
+        "type": "address"
+      }
+    ],
+    "name": "updateJiriPaymentContract",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
