@@ -55,7 +55,6 @@ export class ETL {
   // Method with the main logic to export data to Dune
   private async exportDataToDune(bullmq_flag: string) {
     // Export Sources
-    let sources: any[] = []; // Collection of all sources
     let loadedSources = []; // Collection of sources loaded from RPC
     do {
       // Get the last Sources offset from Redis
@@ -69,8 +68,8 @@ export class ETL {
       loadedSources = await this.rpcApi.loadSourcesPaged(lastOffset);
       loadedSources ||= [];
 
-      // Add loaded sources to the all sources collection
-      Array.prototype.push.apply(sources, loadedSources);
+      // // Add loaded sources to the all sources collection
+      // Array.prototype.push.apply(sources, loadedSources);
 
       // Update the last Sources offset in Redis
       lastOffset = lastOffset + loadedSources.length;
@@ -100,54 +99,64 @@ export class ETL {
       }
     } while (loadedSources.length > 0);
 
+    let sources: any[] = []; // Collection of all sources
     // Export Proofs
     let proofs: any[] = []; // Collection of all proofs
-    // For each source, load proofs from RPC and export them to Dune
-    for (const source of sources) {
-      let proofsForSource = []; // Collection of loaded proofs for a source
-      do {
-        // Get the last Proofs offset for the source from Redis
-        let lastOffset: number = Number(await this.redisClient.get(`lastProofsOffsetForSource${source['id']}`));
-        if (!lastOffset || isNaN(lastOffset) || Number(lastOffset) <= 0) {
-          await this.redisClient.set(`lastProofsOffsetForSource${source['id']}`, 1)
-          lastOffset = Number(await this.redisClient.get(`lastProofsOffsetForSource${source['id']}`));
-        };
+    // Set the Sources offset
+    let offset: number = 1;
+    do {
+      // Get sources from RPC
+      sources = await this.rpcApi.loadSourcesPaged(offset);
+      sources ||= [];
+      offset = offset + sources.length;
 
-        // Get proofs from RPC
-        proofsForSource = await this.rpcApi.loadProofsPaged(source, lastOffset);
-        proofsForSource ||= [];
+      // For each source, load proofs from RPC and export them to Dune
+      for (const source of sources) {
+        let proofsForSource = []; // Collection of loaded proofs for a source
+        do {
+          // Get the last Proofs offset for the source from Redis
+          let lastOffset: number = Number(await this.redisClient.get(`lastProofsOffsetForSource${source['id']}`));
+          if (!lastOffset || isNaN(lastOffset) || Number(lastOffset) <= 0) {
+            await this.redisClient.set(`lastProofsOffsetForSource${source['id']}`, 1)
+            lastOffset = Number(await this.redisClient.get(`lastProofsOffsetForSource${source['id']}`));
+          };
 
-        // Add loaded proofs to the all proofs collection
-        Array.prototype.push.apply(proofs, proofsForSource);
+          // Get proofs from RPC
+          proofsForSource = await this.rpcApi.loadProofsPaged(source, lastOffset);
+          proofsForSource ||= [];
 
-        // Update the last Proofs offset for the source in Redis
-        lastOffset = lastOffset + proofsForSource.length;
-        await this.redisClient.set(`lastProofsOffsetForSource${source['id']}`, lastOffset)
+          // Add loaded proofs to the all proofs collection
+          Array.prototype.push.apply(proofs, proofsForSource);
 
-        // If no proofs were loaded, break the loop
-        if(proofsForSource.length === 0) {
-          break;
-        }
+          // Update the last Proofs offset for the source in Redis
+          lastOffset = lastOffset + proofsForSource.length;
+          await this.redisClient.set(`lastProofsOffsetForSource${source['id']}`, lastOffset)
 
-        // Convert loaded Proofs to CSV
-        let formattedProofsForSource = this.dataFormatter.formatProofs(proofsForSource);
+          // If no proofs were loaded, break the loop
+          if(proofsForSource.length === 0) {
+            break;
+          }
 
-        // Export proofs to Dune
-        if(bullmq_flag === 'without_bullmq') {
-          this.duneAPI.exportProofs(formattedProofsForSource);
-        } else if(bullmq_flag === 'with_bullmq') {
-          this.duneExportQueue.add('duneExportProofs', { proofs: formattedProofsForSource }, {
-            attempts: 5,
-            backoff: {
-              type: 'exponential',
-              delay: 100,
-            },
-            removeOnComplete: 50,
-            removeOnFail: 500,
-          });
-        }
-      } while (proofsForSource.length > 0);
-    }
+          // Convert loaded Proofs to CSV
+          let formattedProofsForSource = this.dataFormatter.formatProofs(proofsForSource);
+
+          // Export proofs to Dune
+          if(bullmq_flag === 'without_bullmq') {
+            this.duneAPI.exportProofs(formattedProofsForSource);
+          } else if(bullmq_flag === 'with_bullmq') {
+            this.duneExportQueue.add('duneExportProofs', { proofs: formattedProofsForSource }, {
+              attempts: 5,
+              backoff: {
+                type: 'exponential',
+                delay: 100,
+              },
+              removeOnComplete: 50,
+              removeOnFail: 500,
+            });
+          }
+        } while (proofsForSource.length > 0);
+      }
+    } while (sources.length > 0);
 
     // Export Verifiers
     await this.duneAPI.clearVerifiers(); // Clear the Verifiers table in Dune (because we don't have pagination for Verifiers)
