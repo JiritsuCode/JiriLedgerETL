@@ -65,8 +65,8 @@ export const handler = async (event: any, context: any, callback: any) => {
     let queueSizes = await duneExportQueue.getJobCounts()
 
     if(queueSizes['active'] === 0 && queueSizes['delayed'] === 0 && queueSizes['waiting'] === 0) {
-      console.log("Dune ETL BullMQ worker finished successfully")
-      callback(null, "Dune ETL BullMQ worker finished successfully")
+      console.log("Dune ETL BullMQ worker finished successfully");
+      duneExportWorker.close();
     }
   });
 
