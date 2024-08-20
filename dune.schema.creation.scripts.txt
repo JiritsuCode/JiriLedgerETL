@@ -1,0 +1,182 @@
+JIRI WORKSPACE PRODUCTION
+
+To actually look at the data inside Dune you need your own account and to have Dov Frohlich to grant you access to his.
+
+Assuming you've logged in on a properly enabled account, you can explore the DB's schema and data here:
+
+https://dune.com/queries/3897656/6550504/6622401c-42ec-449a-aa47-7af16ba1b986?category=uploaded_data&id=dune.jiriledger.sources
+
+That will put you into a simple data browser where you can test queries on the right, and explore the tables on the left.
+
+To list all the tables, click the word "Uploads" in the Data Explorer's breadcrumbs to go up one level.  Then you can pick any table to show its columns, types and attributes.  The initial table shown in the link is "sources" but other tables include:
+- sources
+- proofs
+- verifiers
+
+And they come in the normal flavors shown above along with suffixed varieties like *_dev for specialized cases.  As of August 2024 we are using the normal tables and not the _dev varieties.
+
+Some interesting queries to run in the query window include:
+- select * from dune.jiriledger.sources limit 20;
+- select * from dune.jiriledger.proofs where source_id = 6 order by timestamp desc limit 10;
+
+To actually run the query, type it into the black box and then click the Run button in the lower right.  The run button includes a dropdown that allows you to choose how much power (cost) you're willing to use on the query.  You can run it for free if it is simple and small and you are willing to wait a bit.  We usually run on Medium.
+
+======================
+
+SOURCES
+
+curl --request POST \
+  --url https://api.dune.com/api/v1/table/create \
+  --header 'X-DUNE-API-KEY: hPPNAiNfanDKrNvTVYPILpIKCDZYo30B' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "namespace":"jiriledger",
+  "table_name":"sources",
+  "description": "Jiri Ledger sources",
+  "is_private": false,
+  "schema": [
+{"name": "id", "type": "INT256", "nullable": false},
+{"name": "verifier_id", "type": "INT256", "nullable": false},
+{"name": "verifier_name", "type": "VARCHAR", "nullable": false},
+{"name": "name", "type": "VARCHAR", "nullable": false},
+{"name": "config_hash", "type": "VARCHAR", "nullable": false},
+{"name": "owner_address", "type": "VARCHAR", "nullable": false},
+{"name": "reader_address", "type": "VARCHAR", "nullable": false},
+{"name": "default_metadata", "type": "VARCHAR", "nullable": true},
+{"name": "total_proofs", "type": "INT256", "nullable": false},
+{"name": "last_proof_timestamp", "type": "INT256", "nullable": false},
+{"name": "is_archived", "type": "BOOLEAN", "nullable": false},
+{"name": "last_proof_state", "type": "VARCHAR", "nullable": false}
+  ]
+}'
+
+curl --request DELETE \
+  --url https://api.dune.com/api/v1/table/jiriledger/sources \
+  --header 'X-DUNE-API-KEY: hPPNAiNfanDKrNvTVYPILpIKCDZYo30B'
+
+curl --request POST \
+  --url https://api.dune.com/api/v1/table/jiriledger/sources/clear \
+  --header 'X-DUNE-API-KEY: hPPNAiNfanDKrNvTVYPILpIKCDZYo30B'
+
+======================
+
+PROOFS
+
+curl --request DELETE \
+  --url https://api.dune.com/api/v1/table/jiriledger/proofs \
+  --header 'X-DUNE-API-KEY: hPPNAiNfanDKrNvTVYPILpIKCDZYo30B'
+
+curl --request POST \
+  --url https://api.dune.com/api/v1/table/create \
+  --header 'X-DUNE-API-KEY: hPPNAiNfanDKrNvTVYPILpIKCDZYo30B' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "namespace":"jiriledger",
+  "table_name":"proofs",
+  "description": "Jiri Ledger proofs",
+  "is_private": false,
+  "schema": [
+{"name": "source_id", "type": "INT256", "nullable": false},
+{"name": "proof_id", "type": "VARCHAR", "nullable": false},
+{"name": "proof_hash", "type": "VARCHAR", "nullable": false},
+{"name": "public_proof_hash", "type": "VARCHAR", "nullable": false},
+{"name": "timestamp", "type": "INT256", "nullable": false},
+{"name": "metadata", "type": "VARCHAR", "nullable": false},
+{"name": "value", "type": "INT256", "nullable": false},
+{"name": "quantity", "type": "INT256", "nullable": false},
+{"name": "block_time", "type": "INT256", "nullable": false},
+{"name": "block_number", "type": "INT256", "nullable": false},
+{"name": "state", "type": "VARCHAR", "nullable": false},
+{"name": "corrected_proof_id", "type": "VARCHAR", "nullable": true},
+{"name": "old_incorrect_proof_id", "type": "VARCHAR", "nullable": true}
+  ]
+}'
+
+
+curl --request POST \
+  --url https://api.dune.com/api/v1/table/jiriledger/proofs/clear \
+  --header 'X-DUNE-API-KEY: hPPNAiNfanDKrNvTVYPILpIKCDZYo30B'
+
+============================
+
+VERIFIERS
+
+curl --request DELETE \
+  --url https://api.dune.com/api/v1/table/jiriledger/verifiers \
+  --header 'X-DUNE-API-KEY: hPPNAiNfanDKrNvTVYPILpIKCDZYo30B'
+
+curl --request DELETE \
+  --url https://api.dune.com/api/v1/table/jiriledger/verifiers \
+  --header 'X-DUNE-API-KEY: hPPNAiNfanDKrNvTVYPILpIKCDZYo30B'
+
+curl --request POST \
+  --url https://api.dune.com/api/v1/table/create \
+  --header 'X-DUNE-API-KEY: hPPNAiNfanDKrNvTVYPILpIKCDZYo30B' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "namespace":"jiriledger",
+  "table_name":"verifiers",
+  "description": "Jiri Ledger verifiers",
+  "is_private": false,
+  "schema": [
+{"name": "name", "type": "VARCHAR", "nullable": false},
+{"name": "icon_uri", "type": "VARCHAR", "nullable": true},
+{"name": "private_viewers", "type": "VARCHAR", "nullable": false},
+{"name": "categories", "type": "VARCHAR", "nullable": false},
+{"name": "exists", "type": "BOOLEAN", "nullable": false}
+  ]
+}'
+
+curl --request POST \
+  --url https://api.dune.com/api/v1/table/jiriledger/verifiers/clear \
+  --header 'X-DUNE-API-KEY: hPPNAiNfanDKrNvTVYPILpIKCDZYo30B'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+curl --request POST \
+  --url https://api.dune.com/api/v1/table/create \
+  --header 'X-DUNE-API-KEY: hPPNAiNfanDKrNvTVYPILpIKCDZYo30B' \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "namespace":"jiriledger",
+  "table_name":"proofs",
+  "description": "Jiri Ledger proofs",
+  "is_private": false,
+  "schema": [
+{"name": "source_id", "type": "INT256", "nullable": false},
+{"name": "proof_id", "type": "VARCHAR", "nullable": false},
+{"name": "proof_hash", "type": "VARCHAR", "nullable": false},
+{"name": "public_proof_hash", "type": "VARCHAR", "nullable": false},
+{"name": "timestamp", "type": "INT256", "nullable": false},
+{"name": "metadata", "type": "VARCHAR", "nullable": false},
+{"name": "value", "type": "INT256", "nullable": false},
+{"name": "quantity", "type": "INT256", "nullable": false},
+{"name": "block_time", "type": "INT256", "nullable": false},
+{"name": "block_number", "type": "INT256", "nullable": false},
+{"name": "state", "type": "VARCHAR", "nullable": false}
+  ]
+}'
+
+curl --request DELETE \
+  --url https://api.dune.com/api/v1/table/jiriledger/proofs \
+  --header 'X-DUNE-API-KEY: hPPNAiNfanDKrNvTVYPILpIKCDZYo30B'
+
+curl --request POST \
+  --url https://api.dune.com/api/v1/table/jiriledger/proofs/clear \
+  --header 'X-DUNE-API-KEY: hPPNAiNfanDKrNvTVYPILpIKCDZYo30B'

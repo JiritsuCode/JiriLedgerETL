@@ -1,5 +1,5 @@
-import Web3 from "web3";
-import { contractABI } from "./contract_abi";
+import Web3 from 'web3';
+import { contractABI } from './contract_abi';
 
 // RPCAPI class to interact with the smart contract
 export class RPCAPI {
@@ -12,7 +12,8 @@ export class RPCAPI {
         // Initialize web3 using Infura
         this.web3 = new Web3(process.env.PROVIDER);
         // Your contract ABI
-        this.contractAddress = process.env.JIRI_LEDGER_ADDRESS ?? "";
+        this.contractAddress = process.env.JIRI_LEDGER_ADDRESS ?? '';
+
         // Create contract instance
         this.contract = new this.web3.eth.Contract(
             contractABI,
@@ -21,14 +22,14 @@ export class RPCAPI {
     }
 
     public async loadSources() {
-        console.info("Loading Sources...");
+        console.info('Loading Sources...');
         try {
             let sources = await this.contract.methods.getAllSources().call();
             sources ||= [];
             return sources;
         } catch (error) {
             console.error(
-                "Error calling contract method getAllSources:",
+                'Error calling contract method getAllSources:',
                 error
             );
             return [];
@@ -36,7 +37,7 @@ export class RPCAPI {
     }
 
     public async loadSourcesPaged(lastOffset: number) {
-        console.info("Loading Sources Paged...");
+        console.info('Loading Sources Paged...');
         try {
             let sources = await this.contract.methods
                 .getSourcesPaged(this.pageSize, lastOffset)
@@ -45,7 +46,7 @@ export class RPCAPI {
             return sources;
         } catch (error) {
             console.error(
-                "Error calling contract method getSourcesPaged:",
+                'Error calling contract method getSourcesPaged:',
                 error
             );
             return [];
@@ -53,7 +54,7 @@ export class RPCAPI {
     }
 
     public async loadVerifiers() {
-        console.info("Loading Verifiers...");
+        console.info('Loading Verifiers...');
         try {
             let verifiers = await this.contract.methods
                 .getAllVerifierTypes()
@@ -62,7 +63,7 @@ export class RPCAPI {
             return verifiers;
         } catch (error) {
             console.error(
-                "Error calling contract method getAllVerifierTypes:",
+                'Error calling contract method getAllVerifierTypes:',
                 error
             );
             return [];
@@ -80,7 +81,7 @@ export class RPCAPI {
             return proofs;
         } catch (error) {
             console.error(
-                "Error calling contract method getSourceProofs:",
+                'Error calling contract method getSourceProofs:',
                 error
             );
             return [];
@@ -99,7 +100,7 @@ export class RPCAPI {
             return proofs;
         } catch (error) {
             console.error(
-                "Error calling contract method getSourceProofsPaged:",
+                'Error calling contract method getSourceProofsPaged:',
                 error
             );
             return [];
